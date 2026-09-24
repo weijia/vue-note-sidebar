@@ -17,6 +17,53 @@
 npm install @richard432/vue-note-sidebar vue
 ```
 
+## 不安装直接使用（CDN）
+
+已发布到 npm 的包会自动同步到 unpkg / jsDelivr，可不经 `npm install` 直接在浏览器引用。
+
+### 方式一：ESM + importmap（推荐）
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@richard432/vue-note-sidebar/dist/style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+    "@richard432/vue-note-sidebar": "https://unpkg.com/@richard432/vue-note-sidebar/dist/vue-note-sidebar.js"
+  }
+}
+</script>
+<script type="module">
+  import { createApp, ref } from 'vue'
+  import NoteSidebar, { useNotes } from '@richard432/vue-note-sidebar'
+
+  const allNotes = ref([/* PouchDB 笔记列表 */])
+  const { folders, visibleNotes } = useNotes(allNotes, () => ({}))
+  createApp({ components: { NoteSidebar }, setup: () => ({ folders, visibleNotes }) })
+    .mount('#app')
+</script>
+```
+
+### 方式二：纯 `<script>` 标签（UMD 全局变量）
+
+无需 importmap，加载两个脚本即可，`window.VueNoteSidebar` 即全局对象：
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/@richard432/vue-note-sidebar/dist/style.css" />
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/@richard432/vue-note-sidebar/dist/vue-note-sidebar.umd.cjs"></script>
+<script>
+  const { NoteSidebar, FolderTree, useNotes } = window.VueNoteSidebar
+  const { createApp, ref } = Vue
+  const allNotes = ref([/* PouchDB 笔记列表 */])
+  const { folders, visibleNotes } = useNotes(allNotes, () => ({}))
+  createApp({ components: { NoteSidebar }, setup: () => ({ folders, visibleNotes }) })
+    .mount('#app')
+</script>
+```
+
+> 建议 CDN URL 带版本号（如 `@richard432/vue-note-sidebar@0.1.5`）以保证稳定。
+
 ## 快速使用
 
 ```vue

@@ -3,6 +3,8 @@
   "version": "0.1.4",
   "description": "A reusable Vue 3 sidebar component for browsing PouchDB-backed notes, with folder tree, tag filtering, per-note tagging, search highlighting and a responsive mobile drawer.",
   "type": "module",
+  "unpkg": "dist/vue-note-sidebar.js",
+  "jsdelivr": "dist/vue-note-sidebar.js",
   "files": [
     "dist"
   ],

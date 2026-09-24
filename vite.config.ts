@@ -17,11 +17,12 @@ export default defineConfig({
       entry: fileURLToPath(new URL('./src/index.ts', import.meta.url)),
       name: 'VueNoteSidebar',
       fileName: 'vue-note-sidebar',
-      formats: ['es', 'cjs'],
+      formats: ['es', 'cjs', 'umd'],
     },
     rollupOptions: {
       external: ['vue'],
       output: {
+        exports: 'named',
         globals: { vue: 'Vue' },
         assetFileNames: (assetInfo) =>
           assetInfo.name === 'style.css' ? 'style.css' : String(assetInfo.name),
