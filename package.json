@@ -1,0 +1,57 @@
+{
+  "name": "@weijia/vue-note-sidebar",
+  "version": "0.1.0",
+  "description": "A reusable Vue 3 sidebar component for browsing PouchDB-backed notes, with folder tree, search highlighting and a responsive mobile drawer.",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/vue-note-sidebar.cjs",
+  "module": "./dist/vue-note-sidebar.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-note-sidebar.js",
+      "require": "./dist/vue-note-sidebar.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "sidebar",
+    "notes",
+    "pouchdb",
+    "component",
+    "tree"
+  ],
+  "author": "weijia",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.4",
+    "vitest": "^2.1.2",
+    "vue": "^3.5.10",
+    "vue-tsc": "^2.1.6"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

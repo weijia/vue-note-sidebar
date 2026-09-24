@@ -1,0 +1,230 @@
+.nsb {
+  --nsb-bg: #ffffff;
+  --nsb-fg: #1f2328;
+  --nsb-muted: #6b7280;
+  --nsb-border: #e5e7eb;
+  --nsb-active: #eef2ff;
+  --nsb-active-fg: #4338ca;
+  --nsb-accent: #6366f1;
+  position: relative;
+  width: 280px;
+  height: 100%;
+  border-right: 1px solid var(--nsb-border);
+  background: var(--nsb-bg);
+  color: var(--nsb-fg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+.nsb__panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.nsb__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid var(--nsb-border);
+}
+
+.nsb__search {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.nsb__search-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--nsb-border);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.nsb__search-input:focus {
+  border-color: var(--nsb-accent);
+}
+
+.nsb__search-clear {
+  position: absolute;
+  right: 6px;
+  border: none;
+  background: transparent;
+  color: var(--nsb-muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.nsb__new {
+  flex: none;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--nsb-accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.nsb__new:hover {
+  filter: brightness(1.05);
+}
+
+.nsb__close {
+  display: none;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--nsb-muted);
+}
+
+.nsb__folders {
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--nsb-border);
+  max-height: 40%;
+  overflow: auto;
+}
+
+.nsb__notes {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  overflow: auto;
+  flex: 1;
+}
+
+.nsb__note {
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nsb__note:hover {
+  background: var(--nsb-active);
+}
+
+.nsb__note--active {
+  background: var(--nsb-active);
+  color: var(--nsb-active-fg);
+  font-weight: 600;
+}
+
+.nsb__note-title {
+  font-size: 14px;
+}
+
+.nsb__note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nsb__tag {
+  font-size: 11px;
+  color: var(--nsb-muted);
+}
+
+.nsb__note-date {
+  font-size: 11px;
+  color: var(--nsb-muted);
+}
+
+.nsb__empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--nsb-muted);
+}
+
+/* 文件夹树 */
+.nsb-tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nsb-tree__item {
+  margin: 0;
+}
+
+.nsb-tree__row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.nsb-tree__row:hover {
+  background: var(--nsb-active);
+}
+
+.nsb-tree__row--active {
+  background: var(--nsb-active);
+  color: var(--nsb-active-fg);
+  font-weight: 600;
+}
+
+.nsb-tree__toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--nsb-muted);
+  transition: transform 0.15s ease;
+  width: 16px;
+}
+
+.nsb-tree__toggle--expanded {
+  transform: rotate(90deg);
+}
+
+.nsb-tree__label {
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nsb-tree__count {
+  color: var(--nsb-muted);
+  font-size: 12px;
+}
+
+/* 移动端抽屉 */
+.nsb__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 40;
+}
+
+@media (max-width: 768px) {
+  .nsb {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .nsb--open {
+    transform: translateX(0);
+  }
+
+  .nsb__close {
+    display: block;
+  }
+}

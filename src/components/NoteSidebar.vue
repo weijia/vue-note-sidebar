@@ -1,0 +1,168 @@
+<template>
+  <aside class="nsb" :class="{ 'nsb--open': localOpen }">
+    <div v-if="localOpen" class="nsb__backdrop" @click="close"></div>
+
+    <div class="nsb__panel">
+      <header class="nsb__header">
+        <button v-if="isMobile" class="nsb__close" aria-label="关闭" @click="close">×</button>
+
+        <div class="nsb__search">
+          <input
+            v-model="searchInput"
+            class="nsb__search-input"
+            type="text"
+            placeholder="搜索笔记…"
+            @input="onSearchInput"
+          />
+          <button v-if="searchInput" class="nsb__search-clear" @click="clearSearch">清除</button>
+        </div>
+
+        <button class="nsb__new" @click="onCreateNote">+ 新建</button>
+      </header>
+
+      <nav class="nsb__folders">
+        <FolderTree
+          :nodes="folders"
+          :active-folder="activeFolder"
+          :expanded="expandedFolders"
+          @toggle="toggleFolder"
+          @select="onSelectFolder"
+        />
+      </nav>
+
+      <ul class="nsb__notes">
+        <li
+          v-for="note in notes"
+          :key="note._id"
+          class="nsb__note"
+          :class="{ 'nsb__note--active': note._id === currentNoteId }"
+          @click="onSelectNote(note._id)"
+        >
+          <span class="nsb__note-title" v-html="highlight(note.title)"></span>
+          <span v-if="note.tags?.length" class="nsb__note-tags">
+            <span v-for="t in note.tags" :key="t" class="nsb__tag">#{{ t }}</span>
+          </span>
+          <small v-if="note.updatedAt" class="nsb__note-date">{{ formatDate(note.updatedAt) }}</small>
+        </li>
+        <li v-if="!notes.length" class="nsb__empty">暂无笔记</li>
+      </ul>
+    </div>
+  </aside>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import FolderTree from './FolderTree.vue'
+import type { NoteSidebarProps, NoteSidebarEmits } from '../types'
+
+const props = withDefaults(defineProps<NoteSidebarProps>(), {
+  currentNoteId: '',
+  activeFolder: '',
+  searchKeywords: '',
+  open: false,
+})
+
+const emit = defineEmits<NoteSidebarEmits>()
+
+// ===== 组件内部状态（父组件无需管理） =====
+const expandedFolders = ref<Set<string>>(new Set())
+const searchInput = ref('')
+const localOpen = ref(props.open)
+const isMobile = ref(false)
+
+function checkMobile() {
+  isMobile.value = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+}
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+onUnmounted(() => window.removeEventListener('resize', checkMobile))
+
+// 父组件通过 v-model:open 控制抽屉
+watch(
+  () => props.open,
+  (v) => {
+    localOpen.value = v
+  },
+)
+
+// ===== 搜索：防抖后 emit 原始字符串，父组件负责分词策略 =====
+let debounceTimer: number | undefined
+function onSearchInput() {
+  window.clearTimeout(debounceTimer)
+  debounceTimer = window.setTimeout(() => {
+    emit('search', searchInput.value)
+  }, 250)
+}
+
+function clearSearch() {
+  searchInput.value = ''
+  emit('clear-search')
+}
+
+// 父组件清空关键词时，同步清空输入框
+watch(
+  () => props.searchKeywords,
+  (kw) => {
+    if (!kw) searchInput.value = ''
+  },
+)
+
+function onSelectNote(id: string) {
+  emit('select-note', id)
+}
+
+function onSelectFolder(path: string) {
+  emit('select-folder', path)
+}
+
+function toggleFolder(path: string) {
+  const next = new Set(expandedFolders.value)
+  if (next.has(path)) next.delete(path)
+  else next.add(path)
+  expandedFolders.value = next
+}
+
+function onCreateNote() {
+  emit('create-note', props.activeFolder || '/')
+}
+
+function close() {
+  localOpen.value = false
+  emit('update:open', false)
+}
+
+function open() {
+  localOpen.value = true
+  emit('update:open', true)
+}
+
+// ===== 高亮：根据父组件传回的分词结果做 <mark> 包裹 =====
+function highlight(text: string): string {
+  const kw = (props.searchKeywords ?? '').trim()
+  const escaped = escapeHtml(text)
+  if (!kw) return escaped
+  const tokens = kw.split(/\s+/).filter(Boolean).map(escapeRegExp)
+  const re = new RegExp(`(${tokens.join('|')})`, 'gi')
+  return escaped.replace(re, '<mark>$1</mark>')
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string,
+  )
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString()
+}
+
+defineExpose({ open, close })
+</script>
