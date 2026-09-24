@@ -103,6 +103,34 @@ function removeTag(id: string, tag: string) {
 | `clear-search` | `void` | 清除搜索 |
 | `update:open` | `boolean` | 抽屉状态同步 |
 
+## 标签功能
+
+组件内置完整的标签交互，但**不直接修改存储**——所有写操作都通过事件回传给父组件落库（与「组件只 emit 意图」的设计一致）。
+
+### 1. 标签筛选面板（只读聚合）
+组件从传入的 `notes` 自动聚合所有标签及其出现次数（`aggregateTags(notes)`），渲染为可点击的 chips，并显示每个标签的命中笔记数。
+- 点击某个标签 → `emit('select-tag', tag)`，父组件切换 `activeTags`（再点一次取消，切换语义）。
+- 过滤采用 **AND** 语义：笔记需**同时包含** `activeTags` 中的全部标签，由 `useNotes` 统一处理。
+- 激活的标签会在面板中高亮，并作用于笔记列表过滤与高亮。
+
+### 2. 给当前笔记加标签
+选中某条笔记后，在底部输入框回车或点击「添加」→ `emit('add-tag', noteId, tag)`。
+父组件负责去重并落库（如 `db.put({ ...doc, tags: [...new Set([...doc.tags ?? [], tag])] })`）。
+
+### 3. 移除当前笔记标签
+选中笔记的标签 chip 上的「×」→ `emit('remove-tag', noteId, tag)`。
+父组件负责从数组中移除并落库。
+
+### 标签相关接口一览
+| 名称 | 方向 | 类型 / 载荷 | 说明 |
+| --- | --- | --- | --- |
+| `activeTags` | prop | `string[]?` | 当前激活标签集合，用于过滤与高亮（**父组件拥有**） |
+| `select-tag` | emit | `(tag: string)` | 点击标签筛选 |
+| `add-tag` | emit | `(noteId: string, tag: string)` | 给当前笔记加标签 |
+| `remove-tag` | emit | `(noteId: string, tag: string)` | 移除当前笔记标签 |
+
+> 组合式 `useNotes` 已内置标签 AND 过滤；聚合函数 `aggregateTags(notes)` 也可单独用于自定义面板。
+
 ## 文档
 - [需求文档](./docs/requirements.md)
 - [设计文档](./docs/design.md)

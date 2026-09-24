@@ -88,7 +88,7 @@ interface FolderNode { name: string; path: string; count: number; children: Reco
 
 - NFR-1：组件仅 `vue` 为 peerDependency，不捆绑 PouchDB。
 - NFR-2：提供 `.d.ts` 类型声明，开箱即用 TypeScript。
-- NFR-3：发布到 npm，并通过 GitHub Actions 在打 tag / 发 Release 时自动发布。
+- NFR-3：发布到 npm（包名 `@richard432/vue-note-sidebar`），并通过 GitHub Actions 在打 tag / 发 Release 时自动发布。
 - NFR-4：核心纯函数（`buildFolderTree` / `filterNotes` / `sortNotes` / `aggregateTags`）覆盖单元测试。
 
 ## 6. 验收标准
