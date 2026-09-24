@@ -1,4 +1,4 @@
-# @weijia/vue-note-sidebar
+# @richard432/vue-note-sidebar
 
 一个可复用的 **Vue 3 + TypeScript** 侧边栏组件，用于浏览「以 PouchDB 为存储层」的笔记应用。
 组件**不直接依赖 PouchDB**，它只消费父组件派生好的数据，保证通用性与可测试性。
@@ -14,7 +14,7 @@
 ## 安装
 
 ```bash
-npm install @weijia/vue-note-sidebar vue
+npm install @richard432/vue-note-sidebar vue
 ```
 
 ## 快速使用
@@ -22,9 +22,9 @@ npm install @weijia/vue-note-sidebar vue
 ```vue
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import NoteSidebar, { useNotes } from '@weijia/vue-note-sidebar'
-import '@weijia/vue-note-sidebar/style.css'
-import type { SidebarNote } from '@weijia/vue-note-sidebar'
+import NoteSidebar, { useNotes } from '@richard432/vue-note-sidebar'
+import '@richard432/vue-note-sidebar/style.css'
+import type { SidebarNote } from '@richard432/vue-note-sidebar'
 
 const allNotes = ref<SidebarNote[]>(/* 来自 PouchDB allDocs 的笔记 */)
 const activeFolder = ref('')

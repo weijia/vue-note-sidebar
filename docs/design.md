@@ -87,8 +87,8 @@ interface NoteDoc {
 ## 6. 使用示例（父组件）
 
 ```ts
-import { useNotes } from '@weijia/vue-note-sidebar'
-import '@weijia/vue-note-sidebar/style.css'
+import { useNotes } from '@richard432/vue-note-sidebar'
+import '@richard432/vue-note-sidebar/style.css'
 
 const { folders, visibleNotes } = useNotes(allNotes, () => ({
   activeFolder: activeFolder.value,
