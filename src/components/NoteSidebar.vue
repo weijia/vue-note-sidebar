@@ -30,6 +30,22 @@
         />
       </nav>
 
+      <section class="nsb__tags" v-if="tagList.length">
+        <div class="nsb__tags-title">标签</div>
+        <div class="nsb__tag-list">
+          <button
+            v-for="t in tagList"
+            :key="t.name"
+            type="button"
+            class="nsb__tag-chip"
+            :class="{ 'nsb__tag-chip--active': isActiveTag(t.name) }"
+            @click="onSelectTag(t.name)"
+          >
+            #{{ t.name }} <span class="nsb__tag-count">{{ t.count }}</span>
+          </button>
+        </div>
+      </section>
+
       <ul class="nsb__notes">
         <li
           v-for="note in notes"
@@ -40,25 +56,47 @@
         >
           <span class="nsb__note-title" v-html="highlight(note.title)"></span>
           <span v-if="note.tags?.length" class="nsb__note-tags">
-            <span v-for="t in note.tags" :key="t" class="nsb__tag">#{{ t }}</span>
+            <span v-for="t in note.tags" :key="t" class="nsb__tag">
+              #{{ t }}
+              <button
+                v-if="note._id === currentNoteId"
+                type="button"
+                class="nsb__tag-x"
+                :aria-label="'移除标签 ' + t"
+                @click.stop="onRemoveTag(note._id, t)"
+              >×</button>
+            </span>
           </span>
           <small v-if="note.updatedAt" class="nsb__note-date">{{ formatDate(note.updatedAt) }}</small>
         </li>
         <li v-if="!notes.length" class="nsb__empty">暂无笔记</li>
       </ul>
+
+      <div v-if="currentNoteId" class="nsb__add-tag">
+        <input
+          v-model="newTagInput"
+          class="nsb__add-tag-input"
+          type="text"
+          placeholder="给当前笔记加标签…"
+          @keyup.enter="onAddTag"
+        />
+        <button type="button" class="nsb__add-tag-btn" @click="onAddTag">添加</button>
+      </div>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import FolderTree from './FolderTree.vue'
+import { aggregateTags } from '../composables/useNotes'
 import type { NoteSidebarProps, NoteSidebarEmits } from '../types'
 
 const props = withDefaults(defineProps<NoteSidebarProps>(), {
   currentNoteId: '',
   activeFolder: '',
   searchKeywords: '',
+  activeTags: () => [],
   open: false,
 })
 
@@ -67,8 +105,16 @@ const emit = defineEmits<NoteSidebarEmits>()
 // ===== 组件内部状态（父组件无需管理） =====
 const expandedFolders = ref<Set<string>>(new Set())
 const searchInput = ref('')
+const newTagInput = ref('')
 const localOpen = ref(props.open)
 const isMobile = ref(false)
+
+// 标签面板：从传入的 notes 聚合（含计数）
+const tagList = computed(() => aggregateTags(props.notes))
+
+function isActiveTag(tag: string): boolean {
+  return (props.activeTags ?? []).includes(tag)
+}
 
 function checkMobile() {
   isMobile.value = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
@@ -115,6 +161,21 @@ function onSelectNote(id: string) {
 
 function onSelectFolder(path: string) {
   emit('select-folder', path)
+}
+
+function onSelectTag(tag: string) {
+  emit('select-tag', tag)
+}
+
+function onAddTag() {
+  const tag = newTagInput.value.trim()
+  if (!tag || !props.currentNoteId) return
+  emit('add-tag', props.currentNoteId, tag)
+  newTagInput.value = ''
+}
+
+function onRemoveTag(noteId: string, tag: string) {
+  emit('remove-tag', noteId, tag)
 }
 
 function toggleFolder(path: string) {

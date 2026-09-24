@@ -10,8 +10,9 @@ export {
   filterNotes,
   sortNotes,
   matchKeywords,
+  aggregateTags,
 } from './composables/useNotes'
-export type { FilterOptions } from './composables/useNotes'
+export type { FilterOptions, TagCount } from './composables/useNotes'
 
 export type {
   NoteDoc,

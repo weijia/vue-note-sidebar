@@ -61,6 +61,12 @@ interface NoteDoc {
 ### D5：高亮安全
 - `highlight()` 先 `escapeHtml` 再 `replace`，避免 XSS；仅注入 `<mark>`。
 
+### D6：标签操作放进组件，但落库仍在父组件
+- **组件内做什么**：聚合标签面板（`aggregateTags`）、标签筛选切换（`select-tag`）、给当前笔记加/去标签（`add-tag` / `remove-tag`）。
+- **组件内不做什么**：不直接写 PouchDB、不维护全局标签词表。所有变更都通过 emit 意图，由父组件 `db.put` 落库。
+- **过滤归属**：`activeTags` 是「过滤状态」，与 `activeFolder` 同理由父组件拥有并回传高亮；真正过滤在 `useNotes` 的 `filterNotes` 中完成（标签 AND 匹配），不在组件内部。
+- 这样既不破坏「组件只传标识符、内部状态不上升」的原则，又让用户能在 Sidebar 里完成标签相关交互。
+
 ## 4. 组件拆分
 
 - `NoteSidebar.vue`：主组件。持有 props/emit、内部状态、搜索防抖、抽屉、高亮。

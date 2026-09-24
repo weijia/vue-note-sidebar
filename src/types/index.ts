@@ -48,6 +48,8 @@ export interface NoteSidebarProps {
   activeFolder?: string
   /** 已分词后的搜索关键词，用于 <mark> 高亮（原始输入由 search 事件传出） */
   searchKeywords?: string
+  /** 当前激活的标签过滤集合（与 activeFolder 同理，由父组件拥有并回传用于高亮） */
+  activeTags?: string[]
   /** 移动端抽屉是否打开（v-model:open 同步用），内部也会自行维护 */
   open?: boolean
 }
@@ -56,6 +58,9 @@ export interface NoteSidebarProps {
 export interface NoteSidebarEmits {
   (e: 'select-note', noteId: string): void // 选中笔记 → note._id
   (e: 'select-folder', folderPath: string): void // 选中文件夹 → path
+  (e: 'select-tag', tag: string): void // 点标签筛选 → tag（父组件维护 activeTags）
+  (e: 'add-tag', noteId: string, tag: string): void // 给当前笔记加标签 → 父组件落库
+  (e: 'remove-tag', noteId: string, tag: string): void // 移除当前笔记标签 → 父组件落库
   (e: 'create-note', targetPath: string): void // 新建笔记 → 目标路径
   (e: 'search', rawQuery: string): void // 搜索 → 原始输入字符串
   (e: 'clear-search'): void // 清除搜索 → 无参数

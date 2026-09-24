@@ -209,6 +209,106 @@
   z-index: 40;
 }
 
+/* 标签面板 */
+.nsb__tags {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--nsb-border);
+}
+
+.nsb__tags-title {
+  font-size: 12px;
+  color: var(--nsb-muted);
+  margin-bottom: 4px;
+}
+
+.nsb__tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nsb__tag-chip {
+  border: 1px solid var(--nsb-border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--nsb-fg);
+}
+
+.nsb__tag-chip:hover {
+  border-color: var(--nsb-accent);
+}
+
+.nsb__tag-chip--active {
+  background: var(--nsb-accent);
+  border-color: var(--nsb-accent);
+  color: #fff;
+}
+
+.nsb__tag-count {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+/* 笔记标签 */
+.nsb__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--nsb-muted);
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.nsb__tag-x {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--nsb-muted);
+  font-size: 12px;
+  line-height: 1;
+  padding: 0;
+}
+
+.nsb__tag-x:hover {
+  color: #ef4444;
+}
+
+/* 给当前笔记加标签 */
+.nsb__add-tag {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-top: 1px solid var(--nsb-border);
+}
+
+.nsb__add-tag-input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--nsb-border);
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.nsb__add-tag-input:focus {
+  border-color: var(--nsb-accent);
+}
+
+.nsb__add-tag-btn {
+  border: none;
+  border-radius: 6px;
+  background: var(--nsb-accent);
+  color: #fff;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   .nsb {
     position: fixed;

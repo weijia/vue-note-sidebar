@@ -4,12 +4,13 @@ import {
   filterNotes,
   sortNotes,
   matchKeywords,
+  aggregateTags,
 } from './useNotes'
 import type { SidebarNote } from '../types'
 
 const notes: SidebarNote[] = [
-  { _id: '1', title: '需求文档', path: '/工作/项目A', content: '登录功能', updatedAt: '2026-01-01T00:00:00Z' },
-  { _id: '2', title: '设计稿', path: '/工作/项目A', content: 'Figma', updatedAt: '2026-03-01T00:00:00Z' },
+  { _id: '1', title: '需求文档', path: '/工作/项目A', content: '登录功能', tags: ['重要'], updatedAt: '2026-01-01T00:00:00Z' },
+  { _id: '2', title: '设计稿', path: '/工作/项目A', content: 'Figma', tags: ['进行中'], updatedAt: '2026-03-01T00:00:00Z' },
   { _id: '3', title: '日记', path: '/个人', content: '今天天气好', updatedAt: '2026-02-01T00:00:00Z' },
   { _id: '4', title: '子任务', path: '/工作/项目A/子模块', content: 'x', updatedAt: '2026-04-01T00:00:00Z' },
 ]
@@ -47,5 +48,34 @@ describe('sortNotes', () => {
     const r = sortNotes(notes)
     expect(r[0]._id).toBe('4')
     expect(r[r.length - 1]._id).toBe('1')
+  })
+})
+
+describe('filterNotes - 标签过滤', () => {
+  it('按单个激活标签 AND 匹配', () => {
+    const r = filterNotes(notes, { activeTags: ['重要'] })
+    expect(r.map((n) => n._id)).toEqual(['1'])
+  })
+
+  it('按多个激活标签需全部命中', () => {
+    const tagged = [
+      ...notes,
+      { _id: '6', title: 'x', path: '/', content: '', tags: ['重要', '进行中'], updatedAt: '2026-05-01T00:00:00Z' },
+    ]
+    const r = filterNotes(tagged, { activeTags: ['重要', '进行中'] })
+    expect(r.map((n) => n._id)).toEqual(['6'])
+  })
+})
+
+describe('aggregateTags', () => {
+  it('按出现次数降序聚合标签并计数', () => {
+    const tagged = [
+      ...notes,
+      { _id: '6', title: 'x', path: '/', content: '', tags: ['重要', '进行中'], updatedAt: '2026-05-01T00:00:00Z' },
+    ]
+    const r = aggregateTags(tagged)
+    const important = r.find((t) => t.name === '重要')!
+    expect(important.count).toBe(2) // note1 + note6
+    expect(r[0].count).toBeGreaterThanOrEqual(r[r.length - 1].count)
   })
 })

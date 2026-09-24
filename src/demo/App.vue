@@ -9,9 +9,13 @@
       :notes="visibleNotes"
       :current-note-id="currentNoteId"
       :active-folder="activeFolder"
+      :active-tags="activeTags"
       :search-keywords="searchKeywords"
       @select-note="onSelectNote"
       @select-folder="onSelectFolder"
+      @select-tag="onSelectTag"
+      @add-tag="addTag"
+      @remove-tag="removeTag"
       @create-note="onCreateNote"
       @search="onSearch"
       @clear-search="onClearSearch"
@@ -45,6 +49,7 @@ const allNotes = ref<SidebarNote[]>([
 
 const currentNoteId = ref('')
 const activeFolder = ref('')
+const activeTags = ref<string[]>([])
 const searchKeywords = ref('')
 const drawerOpen = ref(false)
 const isMobile = ref(typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches)
@@ -53,6 +58,7 @@ const sidebarRef = ref<InstanceType<typeof NoteSidebar> | null>(null)
 const { folders, visibleNotes } = useNotes(allNotes, () => ({
   activeFolder: activeFolder.value,
   keywords: searchKeywords.value,
+  activeTags: activeTags.value,
 }))
 
 const current = computed(() => allNotes.value.find((n) => n._id === currentNoteId.value))
@@ -62,6 +68,23 @@ function onSelectNote(id: string) {
 }
 function onSelectFolder(path: string) {
   activeFolder.value = activeFolder.value === path ? '' : path
+}
+function onSelectTag(tag: string) {
+  // 标签过滤是「切换」语义：再点一次取消
+  activeTags.value = activeTags.value.includes(tag)
+    ? activeTags.value.filter((t) => t !== tag)
+    : [...activeTags.value, tag]
+}
+// 模拟 PouchDB 落库：更新某笔记的 tags
+function addTag(noteId: string, tag: string) {
+  allNotes.value = allNotes.value.map((n) =>
+    n._id === noteId ? { ...n, tags: [...new Set([...(n.tags ?? []), tag])] } : n,
+  )
+}
+function removeTag(noteId: string, tag: string) {
+  allNotes.value = allNotes.value.map((n) =>
+    n._id === noteId ? { ...n, tags: (n.tags ?? []).filter((t) => t !== tag) } : n,
+  )
 }
 function onCreateNote(path: string) {
   const id = String(Date.now())
