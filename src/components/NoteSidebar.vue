@@ -91,6 +91,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import FolderTree from './FolderTree.vue'
 import { aggregateTags } from '../composables/useNotes'
 import type { NoteSidebarProps, NoteSidebarEmits } from '../types'
+import { logSidebar } from '../debug'
 
 const props = withDefaults(defineProps<NoteSidebarProps>(), {
   currentNoteId: '',
@@ -122,13 +123,31 @@ function checkMobile() {
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
+  logSidebar.log('mounted', {
+    notes: props.notes.length,
+    currentNoteId: props.currentNoteId,
+    activeFolder: props.activeFolder,
+    isMobile: isMobile.value,
+  })
 })
-onUnmounted(() => window.removeEventListener('resize', checkMobile))
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+  logSidebar.log('unmounted')
+})
+
+// 跟踪传入笔记列表变化，便于定位「列表不刷新」类问题
+watch(
+  () => props.notes.length,
+  (len, prev) => {
+    logSidebar.log('notes 数量变化', { from: prev, to: len })
+  },
+)
 
 // 父组件通过 v-model:open 控制抽屉
 watch(
   () => props.open,
   (v) => {
+    logSidebar.log('open prop 变化', v)
     localOpen.value = v
   },
 )
@@ -138,12 +157,14 @@ let debounceTimer: number | undefined
 function onSearchInput() {
   window.clearTimeout(debounceTimer)
   debounceTimer = window.setTimeout(() => {
+    logSidebar.log('emit search', searchInput.value)
     emit('search', searchInput.value)
   }, 250)
 }
 
 function clearSearch() {
   searchInput.value = ''
+  logSidebar.log('emit clear-search')
   emit('clear-search')
 }
 
@@ -156,25 +177,33 @@ watch(
 )
 
 function onSelectNote(id: string) {
+  logSidebar.log('emit select-note', id)
   emit('select-note', id)
 }
 
 function onSelectFolder(path: string) {
+  logSidebar.log('emit select-folder', path)
   emit('select-folder', path)
 }
 
 function onSelectTag(tag: string) {
+  logSidebar.log('emit select-tag', tag)
   emit('select-tag', tag)
 }
 
 function onAddTag() {
   const tag = newTagInput.value.trim()
-  if (!tag || !props.currentNoteId) return
+  if (!tag || !props.currentNoteId) {
+    logSidebar.warn('add-tag SKIP 标签为空或未选中笔记', { tag, currentNoteId: props.currentNoteId })
+    return
+  }
+  logSidebar.log('emit add-tag', { noteId: props.currentNoteId, tag })
   emit('add-tag', props.currentNoteId, tag)
   newTagInput.value = ''
 }
 
 function onRemoveTag(noteId: string, tag: string) {
+  logSidebar.log('emit remove-tag', { noteId, tag })
   emit('remove-tag', noteId, tag)
 }
 
@@ -183,19 +212,23 @@ function toggleFolder(path: string) {
   if (next.has(path)) next.delete(path)
   else next.add(path)
   expandedFolders.value = next
+  logSidebar.log('toggleFolder', { path, expanded: next.has(path) })
 }
 
 function onCreateNote() {
+  logSidebar.log('emit create-note', props.activeFolder || '/')
   emit('create-note', props.activeFolder || '/')
 }
 
 function close() {
   localOpen.value = false
+  logSidebar.log('emit update:open', false)
   emit('update:open', false)
 }
 
 function open() {
   localOpen.value = true
+  logSidebar.log('emit update:open', true)
   emit('update:open', true)
 }
 

@@ -1,5 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import type { SidebarNote, FolderNode } from '../types'
+import { logNotes } from '../debug'
 
 /**
  * 由笔记列表派生文件夹树。
@@ -25,6 +26,11 @@ export function buildFolderTree(notes: SidebarNote[]): Record<string, FolderNode
       cur = cur[name].children
     }
   }
+
+  logNotes.log('buildFolderTree', {
+    topLevel: Object.keys(tree).length,
+    notes: notes.length,
+  })
 
   return tree
 }
@@ -53,7 +59,7 @@ export function filterNotes(
 ): SidebarNote[] {
   const kw = (options.keywords ?? '').trim()
   const activeTags = options.activeTags ?? []
-  return notes.filter((n) => {
+  const result = notes.filter((n) => {
     if (options.activeFolder && !n.path.startsWith(options.activeFolder)) return false
     if (kw && !matchKeywords(n, kw)) return false
     if (activeTags.length) {
@@ -62,6 +68,14 @@ export function filterNotes(
     }
     return true
   })
+  logNotes.log('filterNotes', {
+    before: notes.length,
+    after: result.length,
+    activeFolder: options.activeFolder ?? '',
+    keywords: kw,
+    activeTags,
+  })
+  return result
 }
 
 export interface TagCount {
@@ -108,5 +122,9 @@ export function useNotes(
   const visibleNotes = computed<SidebarNote[]>(() =>
     sortNotes(filterNotes(toValue(notes), toValue(options))),
   )
+  logNotes.log('useNotes 初始化', {
+    notes: toValue(notes).length,
+    options: toValue(options),
+  })
   return { folders, visibleNotes }
 }

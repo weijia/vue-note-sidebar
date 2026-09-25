@@ -9,11 +9,11 @@
           class="nsb-tree__toggle"
           :class="{ 'nsb-tree__toggle--expanded': isExpanded(node.path) }"
           :aria-label="isExpanded(node.path) ? '收起' : '展开'"
-          @click="emit('toggle', node.path)"
+          @click="onToggle(node.path)"
         >
           ▶
         </button>
-        <span class="nsb-tree__label" @click="emit('select', node.path)">
+        <span class="nsb-tree__label" @click="onSelect(node.path)">
           <span class="nsb-tree__icon">📁</span>
           <span class="nsb-tree__name">{{ node.name }}</span>
           <span class="nsb-tree__count">({{ node.count }})</span>
@@ -33,8 +33,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import type { FolderNode } from '../types'
+import { logTree } from '../debug'
 
 const props = defineProps<{
   nodes: Record<string, FolderNode>
@@ -59,4 +60,21 @@ function isExpanded(path: string): boolean {
 function hasChildren(node: FolderNode): boolean {
   return Object.keys(node.children).length > 0
 }
+
+// 事件统一走这里，便于记录调试日志
+function onToggle(path: string): void {
+  logTree.log('emit toggle', path)
+  emit('toggle', path)
+}
+
+function onSelect(path: string): void {
+  logTree.log('emit select', path)
+  emit('select', path)
+}
+
+onMounted(() => {
+  logTree.log('mounted', { nodes: nodesList.value.length, activeFolder: props.activeFolder })
+})
+
+onUnmounted(() => logTree.log('unmounted'))
 </script>

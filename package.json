@@ -1,6 +1,6 @@
 {
   "name": "@richard432/vue-note-sidebar",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "A reusable Vue 3 sidebar component for browsing PouchDB-backed notes, with folder tree, tag filtering, per-note tagging, search highlighting and a responsive mobile drawer.",
   "type": "module",
   "unpkg": "dist/vue-note-sidebar.js",
@@ -55,5 +55,8 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@richard432/localstorage-logger": "^0.1.0"
   }
 }
