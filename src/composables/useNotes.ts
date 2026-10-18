@@ -35,13 +35,29 @@ export function buildFolderTree(notes: SidebarNote[]): Record<string, FolderNode
   return tree
 }
 
-/** 默认采用 AND 语义：所有关键词 token 都必须命中（父组件可替换策略） */
-export function matchKeywords(note: SidebarNote, rawQuery: string): boolean {
+/** 从 _id（笔记的相对路径，如 '/life/咖啡馆/手冲.md'）取文件名（不含目录） */
+function fileNameOf(note: SidebarNote): string {
+  return (note._id || '').split('/').filter(Boolean).pop() ?? ''
+}
+
+/**
+ * 默认采用 AND 语义：所有关键词 token 都必须命中（父组件可替换策略）。
+ *
+ * 默认检索范围 = 标题 + 正文 + 标签 + 文件名，**不含目录路径**。
+ * 为什么默认不搜目录：目录是「结构」而非「内容」，按目录命中会把整批笔记
+ * 都捞出来（例如搜「咖啡馆」会命中 /life/咖啡馆/ 下所有笔记）。
+ * 需要「按目录搜索」的调用方显式传 matchPath: true。
+ */
+export function matchKeywords(note: SidebarNote, rawQuery: string, matchPath = false): boolean {
   const tokens = rawQuery.toLowerCase().split(/\s+/).filter(Boolean)
   if (!tokens.length) return true
-  const haystack = [note.title, note.content, note.path, ...(note.tags ?? [])]
-    .join('\n')
-    .toLowerCase()
+  const base = fileNameOf(note)
+  const stem = base.replace(/\.(md|markdown|txt)$/i, '')
+  const parts: (string | undefined)[] = [note.title, note.content, stem, ...(note.tags ?? [])]
+  // 保留带后缀的文件名，让「手冲笔记.md」这种写法也能命中
+  if (base && base !== stem) parts.push(base)
+  if (matchPath) parts.push(note.path)
+  const haystack = parts.filter(Boolean).join('\n').toLowerCase()
   return tokens.every((tok) => haystack.includes(tok))
 }
 
@@ -50,6 +66,8 @@ export interface FilterOptions {
   keywords?: string
   /** 激活的标签集合：笔记需同时包含全部激活标签（AND） */
   activeTags?: string[]
+  /** 关键词检索是否包含「目录路径」。默认 false（只搜标题/正文/标签/文件名）。 */
+  matchPath?: boolean
 }
 
 /** 父组件层的过滤：文件夹前缀匹配 + 关键词 AND 匹配 + 标签 AND 匹配 */
@@ -61,7 +79,7 @@ export function filterNotes(
   const activeTags = options.activeTags ?? []
   const result = notes.filter((n) => {
     if (options.activeFolder && !n.path.startsWith(options.activeFolder)) return false
-    if (kw && !matchKeywords(n, kw)) return false
+    if (kw && !matchKeywords(n, kw, options.matchPath)) return false
     if (activeTags.length) {
       const noteTags = n.tags ?? []
       if (!activeTags.every((t) => noteTags.includes(t))) return false

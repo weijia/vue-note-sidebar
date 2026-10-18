@@ -35,11 +35,49 @@ describe('filterNotes', () => {
     const r = filterNotes(notes, { keywords: '需求 登录' })
     expect(r.map((n) => n._id)).toEqual(['1'])
   })
+
+  it('matchPath 透传：默认不按目录搜，true 时才搜', () => {
+    // notes 中 _id 是纯数字，path 含 '项目A'；默认关键词 '项目A' 不应命中任何笔记
+    expect(filterNotes(notes, { keywords: '项目A' })).toEqual([])
+    // 开启 matchPath 后，按目录名搜到 path 含 '项目A' 的 3 条
+    const r = filterNotes(notes, { keywords: '项目A', matchPath: true })
+    expect(r.map((n) => n._id).sort()).toEqual(['1', '2', '4'])
+  })
 })
 
 describe('matchKeywords', () => {
   it('空查询命中全部', () => {
     expect(matchKeywords(notes[0], '   ')).toBe(true)
+  })
+
+  // 构造一条 _id 含目录的笔记，模拟真实 Gitee 数据（_id = 相对路径）
+  const pathNote: SidebarNote = {
+    _id: '/life/咖啡馆/手冲笔记.md',
+    title: '随笔',
+    path: '/life/咖啡馆',
+    content: '今天喝了瑰夏',
+    updatedAt: '2026-06-01T00:00:00Z',
+  }
+
+  it('默认不在目录名中搜索', () => {
+    // '咖啡馆' 只出现在 path（目录），默认不应命中
+    expect(matchKeywords(pathNote, '咖啡馆')).toBe(false)
+    expect(matchKeywords(pathNote, 'life')).toBe(false)
+  })
+
+  it('matchPath=true 时才在目录名中搜索', () => {
+    expect(matchKeywords(pathNote, '咖啡馆', true)).toBe(true)
+    expect(matchKeywords(pathNote, 'life', true)).toBe(true)
+  })
+
+  it('可以按文件名搜索，且忽略 .md 后缀', () => {
+    expect(matchKeywords(pathNote, '手冲笔记')).toBe(true)
+    expect(matchKeywords(pathNote, '手冲笔记.md')).toBe(true)
+  })
+
+  it('标题/内容/标签始终可搜（与 matchPath 无关）', () => {
+    expect(matchKeywords(pathNote, '瑰夏')).toBe(true)
+    expect(matchKeywords(pathNote, '随笔')).toBe(true)
   })
 })
 
