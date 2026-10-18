@@ -1,8 +1,10 @@
 name: Publish to npm
 
-# 自动发布触发条件：推送形如 v0.3.0 的 tag 时触发（仅此一种触发，
+# 自动发布触发条件：推送形如 v0.3.1 的 tag 时触发（仅此一种触发，
 # 避免 push:tags 与 release:published 同时触发导致重复发布冲突）。
 # 使用 npm Trusted Publisher（OIDC），无需 NPM_TOKEN 明文密钥。
+# 前置：npm 包 @richard432/vue-note-sidebar 需在后台配置 Trusted Publisher
+#       （关联仓库 weijia/vue-note-sidebar + workflow 文件名 publish.yml）。
 on:
   push:
     tags:
