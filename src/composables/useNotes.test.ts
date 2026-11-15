@@ -3,6 +3,8 @@ import {
   buildFolderTree,
   filterNotes,
   sortNotes,
+  sortByRecent,
+  recentTime,
   matchKeywords,
   aggregateTags,
 } from './useNotes'
@@ -86,6 +88,29 @@ describe('sortNotes', () => {
     const r = sortNotes(notes)
     expect(r[0]._id).toBe('4')
     expect(r[r.length - 1]._id).toBe('1')
+  })
+})
+
+describe('sortByRecent', () => {
+  const recent: SidebarNote[] = [
+    { _id: '1', title: '旧', path: '/', content: '', commitTime: 1000 },
+    { _id: '2', title: '新', path: '/', content: '', commitTime: 3000 },
+    { _id: '3', title: '中间', path: '/', content: '', commitTime: 2000 },
+  ]
+
+  it('优先按 commitTime 倒序', () => {
+    const r = sortByRecent(recent)
+    expect(r.map((n) => n._id)).toEqual(['2', '3', '1'])
+  })
+
+  it('commitTime 缺失时兜底解析 updatedAt 时间戳', () => {
+    const fallback: SidebarNote = { _id: '9', title: '兜底', path: '/', content: '', updatedAt: '2026-02-01T00:00:00Z' }
+    expect(recentTime(fallback)).toBeGreaterThan(0)
+  })
+
+  it('order=asc 时最早在前', () => {
+    const r = sortByRecent(recent, 'asc')
+    expect(r[r.length - 1]._id).toBe('2')
   })
 })
 

@@ -12,6 +12,8 @@ export {
   buildFolderTree,
   filterNotes,
   sortNotes,
+  sortByRecent,
+  recentTime,
   matchKeywords,
   aggregateTags,
 } from './composables/useNotes'

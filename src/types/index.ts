@@ -24,6 +24,8 @@ export interface SidebarNote {
   path: string // 所属路径，用于文件夹过滤
   content: string // 原文，用于搜索高亮匹配
   updatedAt?: string // 排序 + 显示用
+  /** 远端 commit/mtime 时间（毫秒）；无远端时间时由调用方兜底为 updatedAt */
+  commitTime?: number
   createdAt?: string // 可选，显示用
   tags?: string[] // 可选，标签筛选用
 }

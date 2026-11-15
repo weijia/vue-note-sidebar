@@ -127,6 +127,38 @@ export function sortNotes(
 }
 
 /**
+ * 取笔记的「最新修改时间」（毫秒）：优先 commitTime（远端 commit / mtime），
+ * 兜底 updatedAt（兼容时间戳数字、ISO 字符串）；都取不到返回 0。
+ */
+export function recentTime(note: SidebarNote): number {
+  if (typeof note.commitTime === 'number' && !Number.isNaN(note.commitTime)) {
+    return note.commitTime
+  }
+  const u = note.updatedAt
+  if (typeof u === 'number' && !Number.isNaN(u)) return u
+  if (typeof u === 'string') {
+    const t = Date.parse(u)
+    if (!Number.isNaN(t)) return t
+  }
+  return 0
+}
+
+/**
+ * 「最新修改」视图排序：按 commit 时间倒序（最新在前），
+ * 时间相同再按标题本地化排序，保证结果稳定。
+ */
+export function sortByRecent(
+  notes: SidebarNote[],
+  order: 'desc' | 'asc' = 'desc',
+): SidebarNote[] {
+  return [...notes].sort((a, b) => {
+    const diff = recentTime(b) - recentTime(a)
+    const d = order === 'desc' ? diff : -diff
+    return d !== 0 ? d : a.title.localeCompare(b.title)
+  })
+}
+
+/**
  * 组合式封装：把「原始笔记 → 文件夹树 + 可见列表」的逻辑收口在一个 composable，
  * 父组件直接解构使用，无需自己写派生代码。
  */
